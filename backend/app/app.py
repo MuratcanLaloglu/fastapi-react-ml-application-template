@@ -3,5 +3,5 @@ from fastapi import FastAPI
 app = FastAPI()
 
 @app.get("/")
-def get_post():
+def read_root():
     return {"message":"fastapi is working"}
