@@ -1,9 +1,13 @@
-from fastapi import FastAPI
-import joblib
+from fastapi import FastAPI, Depends
+from services.prediction_service import PredictionService
 from .models import InputData
-import numpy as np
 
 app = FastAPI()
+
+
+# Dependency
+def get_prediction_service():
+    return PredictionService()
 
 
 @app.get("/")
@@ -12,22 +16,8 @@ def read_root():
 
 
 @app.post("/predict")
-def predict(input_data: InputData):
-    model = joblib.load("./mlmodel/model.pkl")
-    scaler = joblib.load("./mlmodel/Scaler.pkl")
-    x_values = np.array(
-        [
-            [
-                input_data.married,
-                input_data.income,
-                input_data.education,
-                input_data.loan_amount,
-                input_data.credit_history,
-            ]
-        ]
-    )
-    scaled_x_values = scaler.transform(x_values)
-
-    prediction = model.predict(scaled_x_values)
-
-    return {"prediction": int(prediction[0])}
+def predict_endpoint(
+    input_data: InputData,
+    prediction_service: PredictionService = Depends(get_prediction_service),
+):
+    return prediction_service.predict(input_data)
