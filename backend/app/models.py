@@ -21,6 +21,7 @@ class User(SQLModel, table=True):
     hashed_password: str
     is_active: bool = Field(default=True)
     credits: int = Field(default=0)
+    tokens: list["Token"] = Relationship(back_populates="user")
 
     def verify_password(self, plain_password):
         return pwd_context.verify(plain_password, self.hashed_password)
