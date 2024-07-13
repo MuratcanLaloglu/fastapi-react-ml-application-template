@@ -1,11 +1,12 @@
+# services/prediction_service.py
 import numpy as np
 from config import load_model, load_scaler
 from app.models import InputData
 
 class PredictionService:
-    def __init__(self):
-        self.model = load_model()
-        self.scaler = load_scaler()
+    def __init__(self, model_name):
+        self.model = load_model(model_name)
+        self.scaler = load_scaler(model_name)  # Pass the model_name to load_scaler
 
     def predict(self, input_data: InputData):
         x_values = np.array(

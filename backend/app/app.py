@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import Session, select
-from .models import User, Token
+from .models import User, Token, Functions
 from .auth import create_access_token, get_current_user, ACCESS_TOKEN_EXPIRE_MINUTES
 from datetime import timedelta
 from .payment import router as payment_router
@@ -46,16 +46,40 @@ async def register(user: User, session: Session = Depends(get_session)):
 async def read_users_me(current_user: User = Depends(get_current_user)):
     return current_user
 
-@app.post("/predict")
-async def predict_endpoint(input_data: InputData, session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
-    if current_user.credits < 1:
-        raise HTTPException(status_code=status.HTTP_402_PAYMENT_REQUIRED, detail="Not enough credits")
+@app.post("/predict/{model_name}")
+async def predict_endpoint(model_name: str, input_data: InputData, session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    if model_name not in ["model1", "model2", "model3"]:
+        raise HTTPException(status_code=400, detail="Invalid model name")
 
-    prediction_service = PredictionService()
+    functions = session.exec(select(Functions).where(Functions.id == current_user.id)).first()
+    if not functions:
+        raise HTTPException(status_code=status.HTTP_402_PAYMENT_REQUIRED, detail=f"Payment required for {model_name}")
+
+    if model_name == "model1" and not functions.model1:
+        raise HTTPException(status_code=status.HTTP_402_PAYMENT_REQUIRED, detail="Payment required for model1")
+    elif model_name == "model2" and not functions.model2:
+        raise HTTPException(status_code=status.HTTP_402_PAYMENT_REQUIRED, detail="Payment required for model2")
+    elif model_name == "model3" and not functions.model3:
+        raise HTTPException(status_code=status.HTTP_402_PAYMENT_REQUIRED, detail="Payment required for model3")
+
+    if model_name == "model1" and current_user.credits < 1:
+        raise HTTPException(status_code=status.HTTP_402_PAYMENT_REQUIRED, detail="Not enough credits for model1")
+    elif model_name == "model2" and current_user.credits < 2:
+        raise HTTPException(status_code=status.HTTP_402_PAYMENT_REQUIRED, detail="Not enough credits for model2")
+    elif model_name == "model3" and current_user.credits < 3:
+        raise HTTPException(status_code=status.HTTP_402_PAYMENT_REQUIRED, detail="Not enough credits for model3")
+
+    prediction_service = PredictionService(model_name)
     prediction = prediction_service.predict(input_data)
 
-    # Deduct one credit
-    current_user.credits -= 1
+    # Deduct credits based on the model used
+    if model_name == "model1":
+        current_user.credits -= 1
+    elif model_name == "model2":
+        current_user.credits -= 2
+    elif model_name == "model3":
+        current_user.credits -= 3
+
     session.add(current_user)
     session.commit()
     session.refresh(current_user)

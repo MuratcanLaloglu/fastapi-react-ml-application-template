@@ -1,5 +1,5 @@
 from sqlmodel import SQLModel, create_engine
-from models import User, Token
+from models import User, Token, Functions
 
 DATABASE_URL = "postgresql://postgres:2534@localhost/mina"
 engine = create_engine(DATABASE_URL, echo=True)

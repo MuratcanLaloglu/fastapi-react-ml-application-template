@@ -5,14 +5,12 @@ from passlib.context import CryptContext
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-
 class InputData(BaseModel):
     married: float
     income: float
     education: float
     loan_amount: float
     credit_history: float
-
 
 class User(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
@@ -29,7 +27,6 @@ class User(SQLModel, table=True):
     def set_password(self, password):
         self.hashed_password = pwd_context.hash(password)
 
-
 class Token(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     access_token: str
@@ -37,5 +34,12 @@ class Token(SQLModel, table=True):
     user_id: int | None = Field(default=None, foreign_key="user.id")
     user: User | None = Relationship(back_populates="tokens")
 
+class Functions(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    model1: bool = Field(default=False)
+    model2: bool = Field(default=False)
+    model3: bool = Field(default=False)
+    cost: int = Field(default=0)  # Add a default value to the cost column
 
 User.model_rebuild()
+Functions.model_rebuild()
