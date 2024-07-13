@@ -6,10 +6,10 @@ from .dependencies import get_session
 
 router = APIRouter()
 
-@router.post("/payment/{model_name}")
-async def process_payment(model_name: str, session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
-    if model_name not in ["model1", "model2", "model3"]:
-        raise HTTPException(status_code=400, detail="Invalid model name")
+@router.post("/payment/{option}")
+async def process_payment(option: str, session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    if option not in ["model1", "model2", "model3", "all"]:
+        raise HTTPException(status_code=400, detail="Invalid payment option")
 
     # Simulate a successful payment
     payment_successful = True  # This can be set to False to simulate a failed payment
@@ -20,17 +20,21 @@ async def process_payment(model_name: str, session: Session = Depends(get_sessio
         if not functions:
             functions = Functions(id=current_user.id)
             session.add(functions)
-        if model_name == "model1":
+        if option == "model1":
             functions.model1 = True
             cost = 30
-        elif model_name == "model2":
+        elif option == "model2":
             functions.model2 = True
             cost = 60
-        elif model_name == "model3":
+        elif option == "model3":
             functions.model3 = True
             cost = 90
+        elif option == "all":
+            functions.model1 = True
+            functions.model2 = True
+            functions.model3 = True
+            cost = 100
 
-        functions.cost = cost  # Set the cost value explicitly
         current_user.credits += cost
 
         session.add(functions)

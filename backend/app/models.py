@@ -39,7 +39,6 @@ class Functions(SQLModel, table=True):
     model1: bool = Field(default=False)
     model2: bool = Field(default=False)
     model3: bool = Field(default=False)
-    cost: int = Field(default=0)  # Add a default value to the cost column
 
 User.model_rebuild()
 Functions.model_rebuild()
