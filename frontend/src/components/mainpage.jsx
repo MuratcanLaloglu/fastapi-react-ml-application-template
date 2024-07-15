@@ -1,9 +1,23 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PredictionForm from './predictionform';
 import PaymentForm from './paymentform';
+import { getUserDetails } from '../api/auth';
 
 const MainPage = ({ user, onLogout, token, updateUser }) => {
-  const purchasedModels = user.models || {};
+  const [purchasedModels, setPurchasedModels] = useState({});
+
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      try {
+        const userDetails = await getUserDetails(token);
+        setPurchasedModels(userDetails.models || {});
+      } catch (error) {
+        console.error('Failed to fetch user details', error);
+      }
+    };
+
+    fetchUserDetails();
+  }, [token]);
 
   return (
     <div>

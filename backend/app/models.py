@@ -39,6 +39,13 @@ class Functions(SQLModel, table=True):
     model1: bool = Field(default=False)
     model2: bool = Field(default=False)
     model3: bool = Field(default=False)
+    
+class UserResponse(BaseModel):
+    id: int
+    username: str
+    email: str
+    credits: int
+    models: dict[str, bool]
 
 User.model_rebuild()
 Functions.model_rebuild()

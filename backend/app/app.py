@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import Session, select
-from .models import User, Token, Functions
+from .models import User, Token, Functions, UserResponse
 from .auth import create_access_token, get_current_user, ACCESS_TOKEN_EXPIRE_MINUTES
 from datetime import timedelta
 from .payment import router as payment_router
@@ -51,7 +51,7 @@ async def register(user: User, session: Session = Depends(get_session)):
     session.refresh(user)
     return user
 
-@app.get("/users/me", response_model=User)
+@app.get("/users/me", response_model=UserResponse)
 async def read_users_me(current_user: User = Depends(get_current_user), session: Session = Depends(get_session)):
     user = session.exec(select(User).where(User.id == current_user.id)).first()
     if not user:
@@ -61,17 +61,17 @@ async def read_users_me(current_user: User = Depends(get_current_user), session:
     if not functions:
         functions = Functions(id=current_user.id, model1=False, model2=False, model3=False)
     
-    return {
-        "id": user.id,
-        "username": user.username,
-        "email": user.email,
-        "credits": user.credits,
-        "models": {
+    return UserResponse(
+        id=user.id,
+        username=user.username,
+        email=user.email,
+        credits=user.credits,
+        models={
             "model1": functions.model1,
             "model2": functions.model2,
             "model3": functions.model3,
         }
-    }
+    )
 
 @app.post("/predict/{model_name}")
 async def predict_endpoint(model_name: str, input_data: InputData, session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
