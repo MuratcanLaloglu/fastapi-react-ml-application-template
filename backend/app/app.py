@@ -7,13 +7,22 @@ from datetime import timedelta
 from .payment import router as payment_router
 from services.prediction_service import PredictionService, InputData
 from .dependencies import get_session
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # You can specify the origins you want to allow
+    allow_methods=["*"],  # You can specify the methods you want to allow
+    allow_headers=["*"],  # You can specify the headers you want to allow
+)
 
 app.include_router(payment_router, prefix="/api")
 
 @app.post("/token", response_model=Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), session: Session = Depends(get_session)):
+    print(f"Received form data: {form_data}")  # Debug statement to print the request body
     user = session.exec(select(User).where(User.username == form_data.username)).first()
     if not user or not user.verify_password(form_data.password):
         raise HTTPException(
@@ -43,8 +52,26 @@ async def register(user: User, session: Session = Depends(get_session)):
     return user
 
 @app.get("/users/me", response_model=User)
-async def read_users_me(current_user: User = Depends(get_current_user)):
-    return current_user
+async def read_users_me(current_user: User = Depends(get_current_user), session: Session = Depends(get_session)):
+    user = session.exec(select(User).where(User.id == current_user.id)).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    functions = session.exec(select(Functions).where(Functions.id == current_user.id)).first()
+    if not functions:
+        functions = Functions(id=current_user.id, model1=False, model2=False, model3=False)
+    
+    return {
+        "id": user.id,
+        "username": user.username,
+        "email": user.email,
+        "credits": user.credits,
+        "models": {
+            "model1": functions.model1,
+            "model2": functions.model2,
+            "model3": functions.model3,
+        }
+    }
 
 @app.post("/predict/{model_name}")
 async def predict_endpoint(model_name: str, input_data: InputData, session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):

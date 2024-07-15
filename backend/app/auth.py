@@ -6,7 +6,7 @@ from sqlmodel import Session, select
 from .models import User
 from .dependencies import get_session
 
-SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
+SECRET_KEY = "4716277ca6e5580f7c496aa837c57caad5aecc14ea99b471a854b017db1bf877"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
