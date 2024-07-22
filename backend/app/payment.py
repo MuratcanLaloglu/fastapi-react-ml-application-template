@@ -11,6 +11,14 @@ async def process_payment(option: str, session: Session = Depends(get_session), 
     if option not in ["model1", "model2", "model3", "all"]:
         raise HTTPException(status_code=400, detail="Invalid payment option")
 
+
+    # TODO: Implement your actual payment processing logic here
+    # This should include:
+    # 1. Calculating the actual cost based on the selected option
+    # 2. Integrating with a payment gateway (e.g., Stripe, PayPal)
+    # 3. Handling the payment transaction
+    # 4. Verifying the payment status
+    
     # Simulate a successful payment
     payment_successful = True  # This can be set to False to simulate a failed payment
 

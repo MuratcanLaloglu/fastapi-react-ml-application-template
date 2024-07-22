@@ -6,7 +6,7 @@ from sqlmodel import Session, select
 from .models import User
 from .dependencies import get_session
 
-SECRET_KEY = "4716277ca6e5580f7c496aa837c57caad5aecc14ea99b471a854b017db1bf877"
+SECRET_KEY = "YOUR SECRET KEY"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
@@ -15,9 +15,9 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode = data.copy()
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = datetime.now() + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
+        expire = datetime.now() + timedelta(minutes=15)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
